@@ -1,0 +1,243 @@
+'npx buidler compile' running
+Compiling...
+
+
+
+
+
+
+Compiled 14 contracts successfully
+
+(node:10255) Warning: Accessing non-existent property 'INVALID_ALT_NUMBER' of module exports inside circular dependency
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:10255) Warning: Accessing non-existent property 'INVALID_ALT_NUMBER' of module exports inside circular dependency
+(node:10255) Warning: Accessing non-existent property 'INVALID_ALT_NUMBER' of module exports inside circular dependency
+(node:10255) Warning: Accessing non-existent property 'INVALID_ALT_NUMBER' of module exports inside circular dependency
+contracts/oven/Oven.sol:32:5: Warning: Visibility for constructor is ignored. If you want the contract to be non-deployable, making it "abstract" is sufficient.
+    constructor(
+    ^ (Relevant source part starts here and spans across multiple lines).
+
+contracts/test/TestPieRecipe.sol:26:24: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    function calcToPie(address _pie, uint256 _poolAmount)
+                       ^----------^
+
+contracts/test/TestPieRecipe.sol:26:38: Warning: Unused function parameter. Remove or comment out the variable name to silence this warning.
+    function calcToPie(address _pie, uint256 _poolAmount)
+                                     ^-----------------^
+
+
+[91m
+Oven.withdrawOutput(address) (contracts/oven/Oven.sol#134-139) ignores return value by pie.transfer(_receiver,_amount) (contracts/oven/Oven.sol#137)
+Oven.saveToken(address) (contracts/oven/Oven.sol#168-175) ignores return value by token.transfer(TOKEN_SAFE,token.balanceOf(address(this))) (contracts/oven/Oven.sol#171-174)
+TestPieRecipe.toPie(address,uint256) (contracts/test/TestPieRecipe.sol#15-20) ignores return value by pie.transfer(msg.sender,_poolAmount) (contracts/test/TestPieRecipe.sol#19)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer[0m
+[91m
+Oven.TOKEN_SAFE (contracts/oven/Oven.sol#23) is never initialized. It is used in:
+	- Oven.saveToken(address) (contracts/oven/Oven.sol#168-175)
+	- Oven.saveETH() (contracts/oven/Oven.sol#177-179)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-state-variables[0m
+[93m
+Contract locking ether found:
+	Contract TestPieRecipe (contracts/test/TestPieRecipe.sol#9-33) has payable functions:
+	 - TestPieRecipe.toPie(address,uint256) (contracts/test/TestPieRecipe.sol#15-20)
+	But does not have a function to withdraw the ether
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#contracts-that-lock-ether[0m
+[92m
+Oven.setCap(uint256) (contracts/oven/Oven.sol#141-143) should emit an event for: 
+	- cap = _cap (contracts/oven/Oven.sol#142) 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-events-arithmetic[0m
+[92m
+Oven.withdrawETH(uint256,address)._receiver (contracts/oven/Oven.sol#125) lacks a zero-check on :
+		- _receiver.transfer(_amount) (contracts/oven/Oven.sol#130)
+Ownable.constructor().msgSender (contracts/recipes/Ownable.sol#27) lacks a zero-check on :
+		- _owner = msgSender (contracts/recipes/Ownable.sol#28)
+OvenFactoryContract.setDefaultController(address)._controller (contracts/oven/OvenFactoryContract.sol#21) lacks a zero-check on :
+		- defaultController = _controller (contracts/oven/OvenFactoryContract.sol#22)
+OvenFactoryContract.setDefaultBaker(address)._baker (contracts/oven/OvenFactoryContract.sol#25) lacks a zero-check on :
+		- defaultBaker = _baker (contracts/oven/OvenFactoryContract.sol#26)
+OvenFactoryContract.setDefaultCapSetter(address)._capSetter (contracts/oven/OvenFactoryContract.sol#29) lacks a zero-check on :
+		- defaultCapSetter = _capSetter (contracts/oven/OvenFactoryContract.sol#30)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation[0m
+[92m
+Reentrancy in Oven.bake(address[],uint256,uint256) (contracts/oven/Oven.sol#60-104):
+	External calls:
+	- realPrice = recipe.calcToPie(address(pie),_outputAmount) (contracts/oven/Oven.sol#65)
+	State variables written after the call(s):
+	- ethBalanceOf[_receivers[i]] = ethBalanceOf[_receivers[i]].sub(userAmount) (contracts/oven/Oven.sol#88-90)
+	- outputBalanceOf[_receivers[i]] = outputBalanceOf[_receivers[i]].add(userBakeAmount) (contracts/oven/Oven.sol#95-97)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2[0m
+[92m
+Reentrancy in OvenFactoryContract.CreateOven(address,address) (contracts/oven/OvenFactoryContract.sol#37-55):
+	External calls:
+	- oven.setCap(uint256(- 1)) (contracts/oven/OvenFactoryContract.sol#46)
+	- oven.grantRole(oven.CAP_SETTER_ROLE(),defaultCapSetter) (contracts/oven/OvenFactoryContract.sol#48)
+	- oven.grantRole(oven.CONTROLLER_ROLE(),defaultController) (contracts/oven/OvenFactoryContract.sol#49)
+	- oven.renounceRole(oven.CAP_SETTER_ROLE(),address(this)) (contracts/oven/OvenFactoryContract.sol#51)
+	- oven.renounceRole(oven.CONTROLLER_ROLE(),address(this)) (contracts/oven/OvenFactoryContract.sol#52)
+	Event emitted after the call(s):
+	- OvenCreated(address(oven),defaultController,_pie,_recipe) (contracts/oven/OvenFactoryContract.sol#54)
+Reentrancy in Oven.bake(address[],uint256,uint256) (contracts/oven/Oven.sol#60-104):
+	External calls:
+	- realPrice = recipe.calcToPie(address(pie),_outputAmount) (contracts/oven/Oven.sol#65)
+	Event emitted after the call(s):
+	- Bake(_receivers[i],userBakeAmount,userAmount) (contracts/oven/Oven.sol#99)
+Reentrancy in Oven.withdrawOutput(address) (contracts/oven/Oven.sol#134-139):
+	External calls:
+	- pie.transfer(_receiver,_amount) (contracts/oven/Oven.sol#137)
+	Event emitted after the call(s):
+	- WithdrawOuput(msg.sender,_amount,_receiver) (contracts/oven/Oven.sol#138)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3[0m
+[92m
+Address.isContract(address) (contracts/recipes/utils/Address.sol#26-35) uses assembly
+	- INLINE ASM (contracts/recipes/utils/Address.sol#33)
+Address._functionCallWithValue(address,bytes,uint256,string) (contracts/recipes/utils/Address.sol#119-140) uses assembly
+	- INLINE ASM (contracts/recipes/utils/Address.sol#132-135)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage[0m
+[92m
+Different versions of Solidity is used:
+	- Version used: ['^0.7.0', '^0.7.1']
+	- ^0.7.1 (contracts/interfaces/IExperiPie.sol#2)
+	- ABIEncoderV2 (contracts/interfaces/IExperiPie.sol#3)
+	- ^0.7.1 (contracts/interfaces/IOven.sol#2)
+	- ^0.7.1 (contracts/interfaces/PieRecipe.sol#2)
+	- ^0.7.1 (contracts/oven/Oven.sol#2)
+	- ^0.7.1 (contracts/oven/OvenFactoryContract.sol#2)
+	- ^0.7.0 (contracts/recipes/Ownable.sol#3)
+	- ^0.7.0 (contracts/recipes/interface/IERC20.sol#3)
+	- ^0.7.0 (contracts/recipes/recipes/AccessControl.sol#3)
+	- ^0.7.0 (contracts/recipes/recipes/SafeMath.sol#3)
+	- ^0.7.0 (contracts/recipes/utils/Address.sol#3)
+	- ^0.7.0 (contracts/recipes/utils/Context.sol#3)
+	- ^0.7.0 (contracts/recipes/utils/EnumerableSet.sol#3)
+	- ^0.7.1 (contracts/test/TestPie.sol#2)
+	- ^0.7.1 (contracts/test/TestPieRecipe.sol#2)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used[0m
+[92m
+AccessControl._setRoleAdmin(bytes32,bytes32) (contracts/recipes/recipes/AccessControl.sol#201-204) is never used and should be removed
+Address._functionCallWithValue(address,bytes,uint256,string) (contracts/recipes/utils/Address.sol#119-140) is never used and should be removed
+Address.functionCall(address,bytes) (contracts/recipes/utils/Address.sol#79-81) is never used and should be removed
+Address.functionCall(address,bytes,string) (contracts/recipes/utils/Address.sol#89-91) is never used and should be removed
+Address.functionCallWithValue(address,bytes,uint256) (contracts/recipes/utils/Address.sol#104-106) is never used and should be removed
+Address.functionCallWithValue(address,bytes,uint256,string) (contracts/recipes/utils/Address.sol#114-117) is never used and should be removed
+Address.isContract(address) (contracts/recipes/utils/Address.sol#26-35) is never used and should be removed
+Address.sendValue(address,uint256) (contracts/recipes/utils/Address.sol#53-59) is never used and should be removed
+Context._msgData() (contracts/recipes/utils/Context.sol#20-23) is never used and should be removed
+EnumerableSet.add(EnumerableSet.UintSet,uint256) (contracts/recipes/utils/EnumerableSet.sol#202-204) is never used and should be removed
+EnumerableSet.at(EnumerableSet.UintSet,uint256) (contracts/recipes/utils/EnumerableSet.sol#240-242) is never used and should be removed
+EnumerableSet.contains(EnumerableSet.UintSet,uint256) (contracts/recipes/utils/EnumerableSet.sol#219-221) is never used and should be removed
+EnumerableSet.length(EnumerableSet.UintSet) (contracts/recipes/utils/EnumerableSet.sol#226-228) is never used and should be removed
+EnumerableSet.remove(EnumerableSet.UintSet,uint256) (contracts/recipes/utils/EnumerableSet.sol#212-214) is never used and should be removed
+SafeMath.mod(uint256,uint256) (contracts/recipes/recipes/SafeMath.sol#139-141) is never used and should be removed
+SafeMath.mod(uint256,uint256,string) (contracts/recipes/recipes/SafeMath.sol#155-158) is never used and should be removed
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dead-code[0m
+[92m
+Pragma version^0.7.1 (contracts/interfaces/IExperiPie.sol#2) allows old versions
+Pragma version^0.7.1 (contracts/interfaces/IOven.sol#2) allows old versions
+Pragma version^0.7.1 (contracts/interfaces/PieRecipe.sol#2) allows old versions
+Pragma version^0.7.1 (contracts/oven/Oven.sol#2) allows old versions
+Pragma version^0.7.1 (contracts/oven/OvenFactoryContract.sol#2) allows old versions
+Pragma version^0.7.0 (contracts/recipes/Ownable.sol#3) allows old versions
+Pragma version^0.7.0 (contracts/recipes/interface/IERC20.sol#3) allows old versions
+Pragma version^0.7.0 (contracts/recipes/recipes/AccessControl.sol#3) allows old versions
+Pragma version^0.7.0 (contracts/recipes/recipes/SafeMath.sol#3) allows old versions
+Pragma version^0.7.0 (contracts/recipes/utils/Address.sol#3) allows old versions
+Pragma version^0.7.0 (contracts/recipes/utils/Context.sol#3) allows old versions
+Pragma version^0.7.0 (contracts/recipes/utils/EnumerableSet.sol#3) allows old versions
+Pragma version^0.7.1 (contracts/test/TestPie.sol#2) allows old versions
+Pragma version^0.7.1 (contracts/test/TestPieRecipe.sol#2) allows old versions
+solc-0.7.1 is not recommended for deployment
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity[0m
+[92m
+Low level call in Address.sendValue(address,uint256) (contracts/recipes/utils/Address.sol#53-59):
+	- (success) = recipient.call{value: amount}() (contracts/recipes/utils/Address.sol#57)
+Low level call in Address._functionCallWithValue(address,bytes,uint256,string) (contracts/recipes/utils/Address.sol#119-140):
+	- (success,returndata) = target.call{value: weiValue}(data) (contracts/recipes/utils/Address.sol#123)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls[0m
+[92m
+TestPieRecipe (contracts/test/TestPieRecipe.sol#9-33) should inherit from PieRecipe (contracts/interfaces/PieRecipe.sol#4-10)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance[0m
+[92m
+Parameter Oven.bake(address[],uint256,uint256)._receivers (contracts/oven/Oven.sol#61) is not in mixedCase
+Parameter Oven.bake(address[],uint256,uint256)._outputAmount (contracts/oven/Oven.sol#62) is not in mixedCase
+Parameter Oven.bake(address[],uint256,uint256)._maxPrice (contracts/oven/Oven.sol#63) is not in mixedCase
+Parameter Oven.withdrawAll(address)._receiver (contracts/oven/Oven.sol#116) is not in mixedCase
+Parameter Oven.withdrawAllETH(address)._receiver (contracts/oven/Oven.sol#121) is not in mixedCase
+Parameter Oven.withdrawETH(uint256,address)._amount (contracts/oven/Oven.sol#125) is not in mixedCase
+Parameter Oven.withdrawETH(uint256,address)._receiver (contracts/oven/Oven.sol#125) is not in mixedCase
+Parameter Oven.withdrawOutput(address)._receiver (contracts/oven/Oven.sol#134) is not in mixedCase
+Parameter Oven.setCap(uint256)._cap (contracts/oven/Oven.sol#141) is not in mixedCase
+Parameter Oven.setPie(address)._pie (contracts/oven/Oven.sol#145) is not in mixedCase
+Parameter Oven.setRecipe(address)._recipe (contracts/oven/Oven.sol#152) is not in mixedCase
+Parameter Oven.setPieAndRecipe(address,address)._pie (contracts/oven/Oven.sol#159) is not in mixedCase
+Parameter Oven.setPieAndRecipe(address,address)._recipe (contracts/oven/Oven.sol#159) is not in mixedCase
+Parameter Oven.saveToken(address)._token (contracts/oven/Oven.sol#168) is not in mixedCase
+Variable Oven.TOKEN_SAFE (contracts/oven/Oven.sol#23) is not in mixedCase
+Parameter OvenFactoryContract.setDefaultController(address)._controller (contracts/oven/OvenFactoryContract.sol#21) is not in mixedCase
+Parameter OvenFactoryContract.setDefaultBaker(address)._baker (contracts/oven/OvenFactoryContract.sol#25) is not in mixedCase
+Parameter OvenFactoryContract.setDefaultCapSetter(address)._capSetter (contracts/oven/OvenFactoryContract.sol#29) is not in mixedCase
+Function OvenFactoryContract.CreateEmptyOven() (contracts/oven/OvenFactoryContract.sol#33-35) is not in mixedCase
+Function OvenFactoryContract.CreateOven(address,address) (contracts/oven/OvenFactoryContract.sol#37-55) is not in mixedCase
+Parameter OvenFactoryContract.CreateOven(address,address)._pie (contracts/oven/OvenFactoryContract.sol#37) is not in mixedCase
+Parameter OvenFactoryContract.CreateOven(address,address)._recipe (contracts/oven/OvenFactoryContract.sol#37) is not in mixedCase
+Parameter TestPie.transfer(address,uint256)._to (contracts/test/TestPie.sol#15) is not in mixedCase
+Parameter TestPie.transfer(address,uint256)._value (contracts/test/TestPie.sol#15) is not in mixedCase
+Parameter TestPie.balanceOf(address)._address (contracts/test/TestPie.sol#21) is not in mixedCase
+Parameter TestPieRecipe.toPie(address,uint256)._pie (contracts/test/TestPieRecipe.sol#15) is not in mixedCase
+Parameter TestPieRecipe.toPie(address,uint256)._poolAmount (contracts/test/TestPieRecipe.sol#15) is not in mixedCase
+Parameter TestPieRecipe.testSetCalcToPieAmount(uint256)._amount (contracts/test/TestPieRecipe.sol#22) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions[0m
+[92m
+Redundant expression "this (contracts/recipes/utils/Context.sol#21)" inContext (contracts/recipes/utils/Context.sol#15-25)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#redundant-statements[0m
+[92m
+Reentrancy in Oven.withdrawAll(address) (contracts/oven/Oven.sol#116-119):
+	External calls:
+	- withdrawAllETH(_receiver) (contracts/oven/Oven.sol#117)
+		- _receiver.transfer(_amount) (contracts/oven/Oven.sol#130)
+	State variables written after the call(s):
+	- withdrawOutput(_receiver) (contracts/oven/Oven.sol#118)
+		- outputBalanceOf[msg.sender] = 0 (contracts/oven/Oven.sol#136)
+	Event emitted after the call(s):
+	- WithdrawOuput(msg.sender,_amount,_receiver) (contracts/oven/Oven.sol#138)
+		- withdrawOutput(_receiver) (contracts/oven/Oven.sol#118)
+Reentrancy in Oven.withdrawETH(uint256,address) (contracts/oven/Oven.sol#125-132):
+	External calls:
+	- _receiver.transfer(_amount) (contracts/oven/Oven.sol#130)
+	Event emitted after the call(s):
+	- WithdrawETH(msg.sender,_amount,_receiver) (contracts/oven/Oven.sol#131)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-4[0m
+[92m
+TestPieRecipe.balance (contracts/test/TestPieRecipe.sol#11) is never used in TestPieRecipe (contracts/test/TestPieRecipe.sol#9-33)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-state-variable[0m
+[92m
+Oven.TOKEN_SAFE (contracts/oven/Oven.sol#23) should be constant
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-constant[0m
+[92m
+bake(address[],uint256,uint256) should be declared external:
+	- Oven.bake(address[],uint256,uint256) (contracts/oven/Oven.sol#60-104)
+owner() should be declared external:
+	- Ownable.owner() (contracts/recipes/Ownable.sol#35-37)
+renounceOwnership() should be declared external:
+	- Ownable.renounceOwnership() (contracts/recipes/Ownable.sol#54-57)
+transferOwnership(address) should be declared external:
+	- Ownable.transferOwnership(address) (contracts/recipes/Ownable.sol#63-67)
+getRoleMemberCount(bytes32) should be declared external:
+	- AccessControl.getRoleMemberCount(bytes32) (contracts/recipes/recipes/AccessControl.sol#95-97)
+getRoleMember(bytes32,uint256) should be declared external:
+	- AccessControl.getRoleMember(bytes32,uint256) (contracts/recipes/recipes/AccessControl.sol#111-113)
+getRoleAdmin(bytes32) should be declared external:
+	- AccessControl.getRoleAdmin(bytes32) (contracts/recipes/recipes/AccessControl.sol#121-123)
+grantRole(bytes32,address) should be declared external:
+	- AccessControl.grantRole(bytes32,address) (contracts/recipes/recipes/AccessControl.sol#135-139)
+revokeRole(bytes32,address) should be declared external:
+	- AccessControl.revokeRole(bytes32,address) (contracts/recipes/recipes/AccessControl.sol#150-154)
+renounceRole(bytes32,address) should be declared external:
+	- AccessControl.renounceRole(bytes32,address) (contracts/recipes/recipes/AccessControl.sol#170-174)
+transfer(address,uint256) should be declared external:
+	- TestPie.transfer(address,uint256) (contracts/test/TestPie.sol#15-19)
+balanceOf(address) should be declared external:
+	- TestPie.balanceOf(address) (contracts/test/TestPie.sol#21-23)
+toPie(address,uint256) should be declared external:
+	- TestPieRecipe.toPie(address,uint256) (contracts/test/TestPieRecipe.sol#15-20)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-external[0m
+. analyzed (14 contracts with 77 detectors), 98 result(s) found
