@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.1;
 
-import "../recipes/recipes/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract TestPie {
     using SafeMath for uint256;
